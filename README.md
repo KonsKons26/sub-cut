@@ -1,0 +1,29 @@
+# sub-cut
+
+Tool to find proteases that cut the provided substrate.
+
+## Descreption
+
+The [MEROPS](https://www.ebi.ac.uk/merops/) database is an information resource for peptidases and their substrates. I created this tool to refine the search for proteases that will cut a given peptide. sub-cut will sort all the database's proteases based on the similarity of the provided substrate sequence with the substrates that it's known to cut.
+
+**Unfinished!!**
+
+**TODO:**
+
+- [ ] Figure out what to do with trypsin
+- [ ] Finish the final sub-cut.py program
+- [ ] Make analyses.ipynb prettier
+- [ ] Finalize the technique used to filter the proteases based on their specificity
+
+## Usage
+
+- Pass the sequences that you want cut in .data/target_dictionary.fasta.
+- Set the specificity threshold in sub-cut.py
+- Run sub-cut.py
+
+```
+python3 sub-cut.py
+```
+
+- Check your results in .data/\<current_date_and_time>_results.xlsx
+- Check out analyses.ipynb for more info
