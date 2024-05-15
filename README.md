@@ -1,6 +1,7 @@
 # sub-cut
 
-Tool to find proteases that cut the provided substrate.
+Tool to find which proteases cut a substrate based on sequence
+
 
 ## Descreption
 
@@ -11,7 +12,7 @@ The [MEROPS](https://www.ebi.ac.uk/merops/) database is an information resource 
 **TODO:**
 
 - [ ] Figure out what to do with trypsin
-- [ ] Finish the final sub-cut.py program
+- [ ] Finalize the final sub-cut.py program
 - [ ] Make analyses.ipynb prettier
 - [ ] Finalize the technique used to filter the proteases based on their specificity
 
