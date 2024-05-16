@@ -99,8 +99,9 @@ def batchalign(proteases_dict, aligner, target_name, target_seq):
     #  Sort the scores by descending order
     df = df.sort_values(by='Score', ascending=False)
 
+    peptide_code = "".join(target_name.split("|")[:2])
     now = datetime.now()
-    out_file_name = f"results/{now.year}-{now.month}-{now.day}_{now.hour}{now.minute}-{target_name[0:25]}.xlsx"
+    out_file_name = f"results/{now.year}-{now.month}-{now.day}_{now.hour}{now.minute}-{peptide_code}.xlsx"
 
     with pd.ExcelWriter(out_file_name, engine="xlsxwriter") as xlsxwriter:
         df.to_excel(xlsxwriter, sheet_name="Sheet1", index=False)
