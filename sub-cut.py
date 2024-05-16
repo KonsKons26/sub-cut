@@ -1,3 +1,10 @@
+import json
+import pandas as pd
+import multiprocessing as mp
+from Bio import SeqIO, Align
+from Bio.Align import substitution_matrices
+from datetime import datetime
+
 
 def setup_aligner():
 
@@ -18,144 +25,121 @@ def setup_aligner():
     aligner.open_gap_score = -10
     aligner.extend_gap_score = -5
 
-    return aligner, matrix
+    return aligner
 
 
-def get_params():
+def get_params(include_proteases_with_one_substrate=True):
+    # Load the data
+    with open("data/substrates_data.json", "r") as in_file_name:
+        substrates_dict = dict(json.load(in_file_name))
 
-    thresh = 17.5
-    file_name = f"filtered_data_{thresh}.csv"
+    with open("data/scored_substrates_positionwise.json", "r") as scores_file:
+        scores_dict = dict(json.load(scores_file))
 
-    #  Get the target name and sequence from the .txt file
+    # Set the specificity threshold here:
+    # range from 0 to 1, 0 will include all protease,
+    # 0.25 will include the top 75% of protease,
+    # 0.42 will include the top 58% of proteases,
+    # 0.5 will include the top 50% of proteases,
+    # 0.8 will include the top 20% of proteases, etc
+    thresh = 0.95
+
+    proteases_dict = {}
+
+    # Always include proteases with only one substrate, as they are highly specific
+    # unless otherwise specified
+    for k, v in substrates_dict.items():
+        if include_proteases_with_one_substrate:
+            for kk in scores_dict["Proteases with only one substrate"].keys():
+                proteases_dict[kk] = substrates_dict[kk]
+        # exclude the cursed trypsin 1
+        if k not in scores_dict["Proteases with only one substrate"] and k != "trypsin 1":
+            if scores_dict["Proteases with more than one substrate"][k] >= thresh:
+                proteases_dict[k] = v
+
     targets = {}
-    with open("targets_dictionary.txt") as f:
-        for line in f:
-            (key, val) = line.split(':')
-            val = val.rstrip()
-            targets[key] = val
+    #  Get the target name and target_sequence from the .txt file
+    with open("data/target_peptides.fasta", "r") as targets_file:
+        records = SeqIO.parse(targets_file, "fasta")
+        for record in records:
+            targets[str(record.id)] = str(record.seq)
 
-        my_path = os.path.dirname(os.path.abspath(__file__))
-
-    return file_name, targets, my_path, thresh
+    return proteases_dict, targets
 
 
-def batchalign(file_name, target, aligner, my_path, matrix, targetname, thresh):
+def batchalign(proteases_dict, aligner, target_name, target_seq):
 
-    #  Read the formatted file
-    df = pd.read_csv(file_name)
-
-    #  Save the recognition sites and peptide names to different lists
-    proteases = df['Protease'].tolist()
-    sites1 = df['recognition_site'].tolist()
-    uniprot = df['UniProt'].tolist()
-
-    sites = []
-
-    #  Convert the sequences to match the biopython alphabet
-    for site in sites1:
-        nsite = ''
-        for letter in site:
-            if letter == '-':
-                nsite += 'X'
-            else:
-                nsite += letter
-        sites.append(nsite)
-
-    #  Create empty lists for scores
+    proteases = []
+    rec_sites = []
     scores = []
     alignments = []
-    #  Iterate over every recognition site and perform the alignment
-    #  Then append the results to the lists
-    for seq in sites:
-        try:
-            aln = aligner.align(target, seq)
-            scores.append(aln.score)
-            alignments.append(str(aln[0]).rstrip('\n'))
-        except IndexError:
-            alignments.append('No significant alignment was made!')
 
-    #  Create a new Data Frame to save all the data
-    new_df = pd.DataFrame(
+    for k, v in proteases_dict.items():
+        for seq in v:
+            proteases.append(k)
+            rec_sites.append(seq)
+            try:
+                aln = aligner.align(target_seq, seq)
+                score = aln.score
+                alignment = str(aln[0]).rstrip("\n")
+            except IndexError:
+                score = None
+                alignment = "No significant alignment was made!"
+            scores.append(score)
+            alignments.append(alignment)
+
+    df = pd.DataFrame(
         {
-            'Protease': proteases,
-            'UniProt': uniprot,
-            'Rec_site': sites,
-            'Score': scores,
-            'Alignment': alignments
-        })
+            "Protease": proteases,
+            "Recognition Site": rec_sites,
+            "Score": scores,
+            "Alignment": alignments}
+    )
 
     #  Sort the scores by descending order
-    final_df = new_df.sort_values(by='Score', ascending=False)
+    df = df.sort_values(by='Score', ascending=False)
 
-    #  Check that a directory exists for the currently used martix
-    Path(my_path + '/results/thresh{}/{}'.format(thresh, matrix)).mkdir(
-        parents=True, exist_ok=True)
+    now = datetime.now()
+    out_file_name = f"results/{now.year}-{now.month}-{now.day}_{now.hour}{now.minute}-{target_name[0:25]}.xlsx"
 
-    #  Save the results
-    with pd.ExcelWriter(
-            my_path +
-        '/results/thresh{}/{}/{}.xlsx'.format(thresh,
-                                              matrix, targetname, sep=','),
-            engine='xlsxwriter') as writer:
-
-        final_df.to_excel(writer, sheet_name='Sheet1', index=False)
-        workbook = writer.book
+    with pd.ExcelWriter(out_file_name, engine="xlsxwriter") as xlsxwriter:
+        df.to_excel(xlsxwriter, sheet_name="Sheet1", index=False)
+        workbook = xlsxwriter.book
         format = workbook.add_format(
-            {'text_wrap': True,
-             'font_name': 'Consolas'})
-        worksheet = writer.sheets['Sheet1']
-        worksheet.set_column('A:F', None, cell_format=format)
+            {
+                "text_wrap": True,
+                "font_name": "Consolas"
+            }
+        )
+        worksheet = xlsxwriter.sheets["Sheet1"]
+        worksheet.set_column("A:F", None, cell_format=format)
 
-    return
 
-
-def multiprocessing(file_name, targets, my_path, aligner, matrix, thresh):
+def multiprocessing(proteases_dict, aligner, targets_dict):
 
     processes = []
-    for targetname, target in targets.items():
+    for target_name, target_seq in targets_dict.items():
 
         p = mp.Process(target=batchalign, args=[
-            file_name,
-            target,
+            proteases_dict,
             aligner,
-            my_path,
-            matrix,
-            targetname,
-            thresh
+            target_name,
+            target_seq
         ])
         p.start()
         processes.append(p)
 
     [process.join() for process in processes]
 
-    return
-
 
 def main():
-
     #  Run the functions
-    aligner, matrix = setup_aligner()
-    file_name, targets, my_path, thresh = get_params()
-    multiprocessing(file_name, targets, my_path, aligner, matrix, thresh)
+    aligner = setup_aligner()
+    proteases_dict, targets_dict = get_params()
+    multiprocessing(proteases_dict, aligner, targets_dict)
 
     return
 
 
 if __name__ == '__main__':
-
-    import os
-    import pandas as pd
-    import multiprocessing as mp
-    from Bio import Align
-    from Bio.Align import substitution_matrices
-    from pathlib import Path
-
-    usage = """
-    Reads the filtered data and aligns each sequence
-    from the filtered recognition sites with each
-    sequence from the 'targets_dictionary.txt' file.
-    Saves the results in an .xlsx file in a new directory.
-    """
-    print(usage)
-
     main()
