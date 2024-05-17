@@ -79,10 +79,18 @@ d = df.groupby("Protease")["Substrate_Sequence"].apply(list).to_dict()
 # Convert the lists of sequences to sets to remove any
 # duplicates, back again to lists so they work with json,
 # and overwrite them in the dictionary
+bigger_than_5k = []
+new_d = {}
 for k, v in d.items():
     s = list(set(v))
-    d[k] = s
+    if len(s) < 5_000:
+        new_d[k] = s
+    else:
+        bigger_than_5k.append(k)
+
+print(
+    f"Proteases {bigger_than_5k} were ignored, as\nthey have more than 5k substrate sequences.")
 
 # Dump in a json file
 with open("data/substrates_data.json", "w") as out_file_name:
-    json.dump(d, out_file_name, sort_keys=True, indent=4)
+    json.dump(new_d, out_file_name, sort_keys=True, indent=4)

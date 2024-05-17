@@ -50,8 +50,8 @@ def get_params(include_proteases_with_one_substrate=True):
     # unless otherwise specified
     for k, v in substrates_dict.items():
         if include_proteases_with_one_substrate:
-            for kk in scores_dict["Proteases with only one substrate"].keys():
-                proteases_dict[kk] = substrates_dict[kk]
+            for one_substrate_proteases in scores_dict["Proteases with only one substrate"]:
+                proteases_dict[one_substrate_proteases] = substrates_dict[one_substrate_proteases]
         # exclude the cursed trypsin 1
         if k not in scores_dict["Proteases with only one substrate"] and k != "trypsin 1":
             if scores_dict["Proteases with more than one substrate"][k] >= thresh:

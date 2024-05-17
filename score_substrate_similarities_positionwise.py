@@ -14,17 +14,14 @@ import multiprocessing as mp
 with open("data/substrates_data.json", "r") as in_file_name:
     substrates_dict = dict(json.load(in_file_name))
 
-# Place trypsin 1 to a separate variable to treat it differently
-trypsin1 = substrates_dict.pop("trypsin 1")
-
 # Initialize new dicts
-one_substrate_proteases = {}
+one_substrate_proteases = []
 mul_substrate_proteases = {}
 
 # Separate proteases with only one substrate
 for k, v in substrates_dict.items():
     if len(v) == 1:
-        one_substrate_proteases[k] = v
+        one_substrate_proteases.append(k)
     else:
         mul_substrate_proteases[k] = v
 
@@ -46,13 +43,13 @@ for k, v in mul_substrate_proteases.items():
     # Update the list of operations for each index
     current_ops_count[min_ops_index] += op_count
 
-# # Print some general data to quickly check that everythin is running smoothly
-# for i, d in enumerate(smaller_dicts):
-#     print(
-#         f"Smaller Dictionary {i+1}\tn. of operations:\t{sum([((len(v) * len(v) - 1) / 2) for v in d.values()])}")
-# print("Missing data:",
-#       len(substrates_dict) - sum([len(d.values())
-#                                   for d in smaller_dicts]) - len(one_substrate_proteases))
+# Print some general data to quickly check that everythin is running smoothly
+for i, d in enumerate(smaller_dicts):
+    print(
+        f"Smaller Dictionary {i+1}\tn. of operations:\t{sum([((len(v) * len(v) - 1) / 2) for v in d.values()])}")
+print("Missing data:",
+      len(substrates_dict) - sum([len(d.values())
+                                  for d in smaller_dicts]) - len(one_substrate_proteases))
 
 # Blosum62 table data
 blosum62df = pd.read_csv("data/blosum62.csv",  index_col=0)
@@ -117,38 +114,6 @@ def flatten_dict_list(nested_list):
     return flattened_dict
 
 
-# def calculate_trypsin_score(trypsin1, blosum62):
-#     """
-#     Function to treat trypsin differently due to its large size
-#     """
-#     def ms(return_list, blosum62, seqs):
-#         scores = []
-#         for aa1, aa2 in zip(seqs):
-#             scores.append(blosum62.loc[aa1, aa2])
-#         score = sum(scores) / len(scores)
-#         return_list.append(score)
-
-#     print("Working on trypsin 1...")
-
-#     combs = [(s1, s2) for s1, s2 in combinations(trypsin1, 2)]
-
-#     with mp.Manager() as manager:
-#         return_list = manager.list()
-#         pool = mp.Pool(processes=cpus)
-#         pool.starmap(ms, [
-#             (return_list, blosum62, seqs) for seqs in combs
-#         ])
-#         pool.close()
-#         pool.join()
-#         score = list(return_list)
-
-#     print("Done working on trypsin 1!")
-
-#     return sum(score) / len(score)
-
-
-# result["trypsin 1"] = calculate_trypsin_score(trypsin1, blosum62df)
-
 # Flatten the nested list and convert to a single dictionary, then order
 result_dict = flatten_dict_list(result)
 result_dict = dict(sorted(result_dict.items(), key=lambda x: x[1]))
@@ -162,19 +127,14 @@ for k, v in result_dict.items():
     # z_i = (x_i – min(x)) / (max(x) – min(x))
     result_dict[k] = (v - min_val) / (max_minus_min)
 
-for k, v in one_substrate_proteases.items():
-    one_substrate_proteases[k] = None
+# one_substrate_proteases_list = []
+# for k, v in one_substrate_proteases.items():
+#     one_substrate_proteases
 
 # Put both dictionaries in one for saving
 final_dict = {}
 final_dict["Proteases with more than one substrate"] = result_dict
 final_dict["Proteases with only one substrate"] = one_substrate_proteases
-
-# # Print the resulting dict
-# for k, v in final_dict.items():
-#     print(k)
-#     for kk, vv in v.items():
-#         print(f"{kk}\t{vv}")
 
 # Dump in a json file
 with open("data/scored_substrates_positionwise.json", "w") as out_file_name:
