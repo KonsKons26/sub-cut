@@ -127,10 +127,6 @@ for k, v in result_dict.items():
     # z_i = (x_i – min(x)) / (max(x) – min(x))
     result_dict[k] = (v - min_val) / (max_minus_min)
 
-# one_substrate_proteases_list = []
-# for k, v in one_substrate_proteases.items():
-#     one_substrate_proteases
-
 # Put both dictionaries in one for saving
 final_dict = {}
 final_dict["Proteases with more than one substrate"] = result_dict
