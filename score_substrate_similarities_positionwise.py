@@ -147,7 +147,7 @@ def flatten_dict_list(nested_list):
 #     return sum(score) / len(score)
 
 
-result["trypsin 1"] = calculate_trypsin_score(trypsin1, blosum62df)
+# result["trypsin 1"] = calculate_trypsin_score(trypsin1, blosum62df)
 
 # Flatten the nested list and convert to a single dictionary, then order
 result_dict = flatten_dict_list(result)

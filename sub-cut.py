@@ -46,7 +46,7 @@ def get_params(include_proteases_with_one_substrate=True):
 
     proteases_dict = {}
 
-    # Always include proteases with only one substrate, as they are highly specific
+    # Always include proteases with only one substrate, as they are highly specific,
     # unless otherwise specified
     for k, v in substrates_dict.items():
         if include_proteases_with_one_substrate:
@@ -68,26 +68,34 @@ def get_params(include_proteases_with_one_substrate=True):
 
 
 def batchalign(proteases_dict, aligner, target_name, target_seq):
-
+    # Create empty lists
     proteases = []
     rec_sites = []
     scores = []
     alignments = []
 
+    # Loop over each protease, substrates_list pair
     for k, v in proteases_dict.items():
+        # Loop over each substrate sequence
         for seq in v:
+            # This will look like this:
+            # ["Prot1", "Prot1", "Prot1", "Prot2", "Prot3",...]
+            # ["P1seq1", "P1seq2", "P1seq3", "P2seq1", "P3seq1",...]
             proteases.append(k)
             rec_sites.append(seq)
             try:
+                # Align the protease substrate seq with the target peptide seq
                 aln = aligner.align(target_seq, seq)
                 score = aln.score
                 alignment = str(aln[0]).rstrip("\n")
             except IndexError:
+                # IndexError raised on `aln[0]` if no alignments are made
                 score = None
                 alignment = "No significant alignment was made!"
             scores.append(score)
             alignments.append(alignment)
 
+    # Store all lists in a DF
     df = pd.DataFrame(
         {
             "Protease": proteases,
@@ -99,10 +107,15 @@ def batchalign(proteases_dict, aligner, target_name, target_seq):
     #  Sort the scores by descending order
     df = df.sort_values(by='Score', ascending=False)
 
+    # Headers must have the form:
+    # >7BZ5_1|Chain_A_pos433-510|Spike_protein_S1
+    # for this to work properly, the file name will look like this:
+    # <currentDate&Time>-7BZ5_1Chain_A_pos433-510.xlsx
     peptide_code = "".join(target_name.split("|")[:2])
     now = datetime.now()
     out_file_name = f"results/{now.year}-{now.month}-{now.day}_{now.hour}{now.minute}-{peptide_code}.xlsx"
 
+    # Write the output in an xlsx file so that the alignments can also be visualized
     with pd.ExcelWriter(out_file_name, engine="xlsxwriter") as xlsxwriter:
         df.to_excel(xlsxwriter, sheet_name="Sheet1", index=False)
         workbook = xlsxwriter.book
@@ -117,7 +130,7 @@ def batchalign(proteases_dict, aligner, target_name, target_seq):
 
 
 def multiprocessing(proteases_dict, aligner, targets_dict):
-
+    # MP magic, run every target peptide in parallel
     processes = []
     for target_name, target_seq in targets_dict.items():
 
