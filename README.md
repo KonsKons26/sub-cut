@@ -22,13 +22,13 @@ The protease-substrate data from MEROPS db are stored locally but I also provide
 
 ## Usage
 
-- Pass the sequences that you want cut in .data/target_peptides.fasta.
-- Set the specificity threshold in sub-cut.py
-- Run sub-cut.py
+- Pass the sequences that you want cut in `data/target_peptides.fasta`.
+- Set the specificity threshold in `sub-cut.py`
+- Run `sub-cut.py`
 
 ```
 python3 sub-cut.py
 ```
 
-- Check your results in .data/\<current_date_and_time>_results.xlsx
-- Check out analyses.ipynb for more info
+- Check your results in `data/<current_date_and_time>_results.xlsx`
+- Check out `analyses.ipynb` for more info and `example.ipynb`
