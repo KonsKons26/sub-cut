@@ -49,7 +49,7 @@ def get_params(score_type="positionwise", include_proteases_with_one_substrate=T
     # 0.42 will include the top 58% of proteases,
     # 0.5 will include the top 50% of proteases,
     # 0.8 will include the top 20% of proteases, etc
-    thresh = 0.95
+    thresh = 0.6
 
     proteases_dict = {}
 
