@@ -115,9 +115,9 @@ def batchalign(proteases_dict, aligner, target_name, target_seq):
     df = df.sort_values(by='Score', ascending=False)
 
     # Headers must have the form:
-    # >7BZ5_1|Chain_A_pos433-510|Spike_protein_S1
+    # >7BZ5_1|Chain_A_433-510|Spike_protein_S1
     # for this to work properly, the file name will look like this:
-    # <currentDate&Time>-7BZ5_1Chain_A_pos433-510.xlsx
+    # <currentDate&Time>-7BZ5_1Chain_A_433-510.xlsx
     peptide_code = "".join(target_name.split("|")[:2])
     now = datetime.now()
     out_file_name = f"results/{now.year}-{now.month}-{now.day}_{now.hour}{now.minute}-{peptide_code}.xlsx"
@@ -153,13 +153,27 @@ def multiprocessing(proteases_dict, aligner, targets_dict):
     [process.join() for process in processes]
 
 
+def move_targets():
+    # Appends the target peptides processed to the file data/old_target_peptides.txt
+    # and empties out the data/target_peptides.fasta
+    now = datetime.now()
+    now = f"{now.year}-{now.month}-{now.day}_{now.hour}{now.minute}"
+    with open("data/target_peptides.fasta", "r") as current_targets_file:
+        current_targets = current_targets_file.read()
+    with open("data/old_target_peptides.txt", "a") as old_targets_file:
+        old_targets_file.write(f"{now}\n")
+        old_targets_file.write(current_targets)
+        old_targets_file.write("\n")
+    with open("data/target_peptides.fasta", "w") as current_targets_file:
+        current_targets_file.write("")
+
+
 def main():
     #  Run the functions
     aligner = setup_aligner()
     proteases_dict, targets_dict = get_params()
     multiprocessing(proteases_dict, aligner, targets_dict)
-
-    return
+    move_targets()
 
 
 if __name__ == '__main__':
