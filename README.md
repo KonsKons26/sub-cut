@@ -12,10 +12,10 @@ The protease-substrate data from MEROPS db are stored locally but I also provide
 
 **TODO:**
 
-- [ ] Figure out what to do with trypsin
+- [X] Remove proteases with many thousands of substrates
 - [X] Finalize the final sub-cut.py program
 - [ ] Make analyses.ipynb prettier
-- [ ] Finalize the technique used to filter the proteases based on their specificity
+- [X] Finalize the technique used to filter the proteases based on their specificity
 - [ ] Organize paths and locations
 - [X] LICENSE
 
