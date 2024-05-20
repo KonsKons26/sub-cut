@@ -28,13 +28,20 @@ def setup_aligner():
     return aligner
 
 
-def get_params(include_proteases_with_one_substrate=True):
+def get_params(score_type="positionwise", include_proteases_with_one_substrate=True):
     # Load the data
     with open("data/substrates_data.json", "r") as in_file_name:
         substrates_dict = dict(json.load(in_file_name))
 
-    with open("data/scored_substrates_positionwise.json", "r") as scores_file:
-        scores_dict = dict(json.load(scores_file))
+    if score_type == "positionwise":
+        with open("data/scored_substrates_positionwise.json", "r") as scores_file:
+            scores_dict = dict(json.load(scores_file))
+    elif score_type == "biopython":
+        with open("data/scored_substrates_biopython.json", "r") as scores_file:
+            scores_dict = dict(json.load(scores_file))
+    else:
+        raise ValueError(
+            "Invalid score_type: must be 'positionwise' or 'biopython'")
 
     # Set the specificity threshold here:
     # range from 0 to 1, 0 will include all protease,
