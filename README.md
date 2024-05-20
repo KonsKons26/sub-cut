@@ -19,4 +19,4 @@ python3 sub-cut.py
 ```
 
 - Check your results in `data/<current_date_and_time>_results.xlsx`
-- Check out `analyses.ipynb` for more info and `example.ipynb`
+- Check out `analyses.ipynb` for more info and `example.ipynb` for an example
