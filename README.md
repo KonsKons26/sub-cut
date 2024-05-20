@@ -17,6 +17,7 @@ The protease-substrate data from MEROPS db are stored locally but I also provide
 - [ ] Make analyses.ipynb prettier
 - [X] Finalize the technique used to filter the proteases based on their specificity
 - [ ] Organize paths and locations
+- [ ] Add example
 - [X] LICENSE
 
 ## Usage
