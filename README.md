@@ -8,18 +8,6 @@ The [MEROPS](https://www.ebi.ac.uk/merops/) database is an information resource 
 
 The protease-substrate data from MEROPS db are stored locally but I also provide them processed in the .data/substrates.data.json file.
 
-**Unfinished!!**
-
-**TODO:**
-
-- [X] Remove proteases with many thousands of substrates
-- [X] Finalize the final sub-cut.py program
-- [ ] Make analyses.ipynb prettier
-- [X] Finalize the technique used to filter the proteases based on their specificity
-- [ ] Organize paths and locations
-- [ ] Add example
-- [X] LICENSE
-
 ## Usage
 
 - Pass the sequences that you want cut in `data/target_peptides.fasta`.
