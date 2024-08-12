@@ -28,7 +28,7 @@ def setup_aligner():
     return aligner
 
 
-def get_params(score_type="positionwise", include_proteases_with_one_substrate=True):
+def get_params(score_type="biopython", include_proteases_with_one_substrate=True):
     # Load the data
     with open("data/substrates_data.json", "r") as in_file_name:
         substrates_dict = dict(json.load(in_file_name))
