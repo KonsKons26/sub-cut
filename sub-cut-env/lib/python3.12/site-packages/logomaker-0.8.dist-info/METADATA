@@ -1,0 +1,24 @@
+Metadata-Version: 2.1
+Name: logomaker
+Version: 0.8
+Summary: Package for making Sequence Logos
+Home-page: http://logomaker.readthedocs.io
+Author: Ammar Tareen, Justin B. Kinney
+Author-email: tareen@cshl.edu
+License: MIT
+Keywords: Sequence Logos
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Topic :: Text Processing :: Linguistic
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: pandas
+
+Logomaker
+---------
+
+Logomaker is a Python package for generating publication-quality sequence logos. Logomaker can generate both standard and highly customized logos illustrating the properties of DNA, RNA, or protein sequences. Logos are rendered as vector graphics embedded within native matplotlib Axes objects, making them easy to style and incorporate into multi-panel figures. Please see 'https://logomaker.readthedocs.io' for additional details.
+
